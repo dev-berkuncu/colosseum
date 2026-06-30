@@ -21,7 +21,17 @@ const readDB = async () => {
   } catch (err) {
     console.error('Error reading database from KV:', err);
   }
-  return { projects: [], videos: [], settings: {}, nextId: 1 };
+  return { 
+    projects: [], 
+    videos: [], 
+    settings: {
+      title: 'Colosseum',
+      sub: 'Belgesel · Kısa Film · Tanıtım',
+      email: 'contact@colosseum.com',
+      phone: '888-888-88'
+    }, 
+    nextId: 1 
+  };
 };
 
 // Helper function to write DB
