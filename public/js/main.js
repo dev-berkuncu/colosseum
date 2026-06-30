@@ -4,9 +4,8 @@ const defaultState = {
   settings: {
     title: 'Colosseum',
     sub: 'Belgesel · Kısa Film · Tanıtım',
-    email: 'iletisim@colosseum.com',
-    phone: '+90 555 000 0000',
-    loc: 'İstanbul, Türkiye'
+    email: 'contact@colosseum.com',
+    phone: '888-888-88'
   }
 };
 
@@ -326,7 +325,6 @@ function fillSettingsForm() {
   document.getElementById('set-sub').value = state.settings.sub;
   document.getElementById('set-email').value = state.settings.email;
   document.getElementById('set-phone').value = state.settings.phone;
-  document.getElementById('set-loc').value = state.settings.loc;
 }
 
 function applySettings() {
@@ -336,22 +334,20 @@ function applySettings() {
   document.querySelector('.footer-logo').textContent = state.settings.title;
   document.getElementById('contactEmail').textContent = state.settings.email;
   document.getElementById('contactPhone').textContent = state.settings.phone;
-  document.getElementById('contactLoc').textContent = state.settings.loc;
   document.title = state.settings.title + ' Film & Media';
 }
 
 window.saveSettings = async function () {
   const title = document.getElementById('set-title').value.trim() || 'Colosseum';
   const sub = document.getElementById('set-sub').value.trim() || 'Belgesel · Kısa Film · Tanıtım';
-  const email = document.getElementById('set-email').value.trim() || 'iletisim@colosseum.com';
-  const phone = document.getElementById('set-phone').value.trim() || '+90 555 000 0000';
-  const loc = document.getElementById('set-loc').value.trim() || 'İstanbul, Türkiye';
+  const email = document.getElementById('set-email').value.trim() || 'contact@colosseum.com';
+  const phone = document.getElementById('set-phone').value.trim() || '888-888-88';
   
   try {
     const res = await fetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, sub, email, phone, loc })
+      body: JSON.stringify({ title, sub, email, phone })
     });
     if (res.ok) {
       state.settings = await res.json();

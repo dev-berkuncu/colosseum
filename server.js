@@ -116,8 +116,8 @@ app.delete('/api/videos/:id', async (req, res) => {
 // Settings
 app.post('/api/settings', async (req, res) => {
   const db = await readDB();
-  const { title, sub, email, phone, loc } = req.body;
-  db.settings = { title, sub, email, phone, loc };
+  const { title, sub, email, phone } = req.body;
+  db.settings = { title, sub, email, phone };
   await writeDB(db);
   res.json(db.settings);
 });
