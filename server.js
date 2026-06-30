@@ -11,6 +11,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Fallback user and pass
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'colosseum123';
+const ADMIN_TOKEN = 'tok_' + Buffer.from(ADMIN_USER + ':' + ADMIN_PASS).toString('base64');
+
 // Helper function to read DB
 const readDB = async () => {
   try {
@@ -43,7 +48,27 @@ const writeDB = async (data) => {
   }
 };
 
+// --- Auth Middleware ---
+const requireAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader === `Bearer ${ADMIN_TOKEN}`) {
+    next();
+  } else {
+    res.status(401).json({ error: 'Yetkisiz işlem. Lütfen giriş yapın.' });
+  }
+};
+
 // --- API Endpoints ---
+
+// Login
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    res.json({ token: ADMIN_TOKEN });
+  } else {
+    res.status(401).json({ error: 'Hatalı kullanıcı adı veya şifre' });
+  }
+});
 
 // Get all data (for initial load)
 app.get('/api/data', async (req, res) => {
@@ -52,7 +77,7 @@ app.get('/api/data', async (req, res) => {
 });
 
 // Projects
-app.post('/api/projects', async (req, res) => {
+app.post('/api/projects', requireAuth, async (req, res) => {
   const db = await readDB();
   const { title, tag, desc, video, color } = req.body;
   const newProject = {
@@ -68,7 +93,7 @@ app.post('/api/projects', async (req, res) => {
   res.status(201).json(newProject);
 });
 
-app.delete('/api/projects/:id', async (req, res) => {
+app.delete('/api/projects/:id', requireAuth, async (req, res) => {
   const db = await readDB();
   const id = parseInt(req.params.id);
   db.projects = db.projects.filter(p => p.id !== id);
@@ -85,7 +110,7 @@ app.delete('/api/projects/:id', async (req, res) => {
 });
 
 // Videos
-app.post('/api/videos', async (req, res) => {
+app.post('/api/videos', requireAuth, async (req, res) => {
   const db = await readDB();
   const { title, url, desc, projId } = req.body;
   const newVideo = {
@@ -106,7 +131,7 @@ app.post('/api/videos', async (req, res) => {
   res.status(201).json(newVideo);
 });
 
-app.delete('/api/videos/:id', async (req, res) => {
+app.delete('/api/videos/:id', requireAuth, async (req, res) => {
   const db = await readDB();
   const id = parseInt(req.params.id);
   
@@ -124,7 +149,7 @@ app.delete('/api/videos/:id', async (req, res) => {
 });
 
 // Settings
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', requireAuth, async (req, res) => {
   const db = await readDB();
   const { title, sub, email, phone } = req.body;
   db.settings = { title, sub, email, phone };

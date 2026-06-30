@@ -18,7 +18,6 @@
     <li><a href="#hizmetler">Hizmetler</a></li>
     <li><a href="#iletisim">İletişim</a></li>
   </ul>
-  <button class="nav-admin" onclick="openAdmin()">⚙ Admin</button>
 </nav>
 
 <!-- HERO -->
@@ -167,110 +166,6 @@
   <div class="video-modal-inner" id="videoModalInner">
     <button class="video-modal-close" onclick="closeVideoModal()">✕ KAPAT</button>
     <video id="modalVideo" controls></video>
-  </div>
-</div>
-
-<!-- ADMİN PANELİ -->
-<div class="admin-overlay" id="adminOverlay">
-  <div class="admin-panel">
-    <div class="admin-header">
-      <div class="admin-title">Admin Paneli</div>
-      <button class="admin-close" onclick="closeAdmin()">✕ Kapat</button>
-    </div>
-
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchTab('projects')">Projeler</button>
-      <button class="admin-tab" onclick="switchTab('videos')">Videolar</button>
-      <button class="admin-tab" onclick="switchTab('settings')">Ayarlar</button>
-    </div>
-
-    <!-- PROJELER TAB -->
-    <div class="tab-content active" id="tab-projects">
-      <div class="msg-box" id="proj-msg"></div>
-      <div class="admin-form">
-        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#FFE3A1;margin-bottom:.5rem;letter-spacing:.1em;">YENİ PROJE EKLE</div>
-        <div class="form-group">
-          <label>Proje Başlığı</label>
-          <input type="text" id="proj-title" placeholder="Proje adı...">
-        </div>
-        <div class="form-group">
-          <label>Kategori / Etiket</label>
-          <input type="text" id="proj-tag" placeholder="Belgesel, Kısa Film, Tanıtım...">
-        </div>
-        <div class="form-group">
-          <label>Kısa Açıklama</label>
-          <textarea id="proj-desc" placeholder="Proje hakkında kısa bilgi..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Video URL (isteğe bağlı)</label>
-          <input type="text" id="proj-video" placeholder="https://... veya boş bırakın">
-        </div>
-        <div class="form-group">
-          <label>Arka Plan Rengi</label>
-          <select id="proj-color">
-            <option value="0">Gün Batımı Taşı</option>
-            <option value="1">Zeytin Yeşili</option>
-            <option value="2">Roma Kırmızısı</option>
-            <option value="3">Akdeniz Mavisi</option>
-            <option value="4">Altın Kum</option>
-          </select>
-        </div>
-        <button class="btn-admin-save" onclick="addProject()">Proje Ekle</button>
-      </div>
-      <div class="content-list" id="projList"></div>
-    </div>
-
-    <!-- VİDEOLAR TAB -->
-    <div class="tab-content" id="tab-videos">
-      <div class="msg-box" id="vid-msg"></div>
-      <div class="admin-form">
-        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#FFE3A1;margin-bottom:.5rem;letter-spacing:.1em;">VİDEO EKLE</div>
-        <div class="form-group">
-          <label>Video Başlığı</label>
-          <input type="text" id="vid-title" placeholder="Video adı...">
-        </div>
-        <div class="form-group">
-          <label>Video URL veya Dosya Yolu</label>
-          <input type="text" id="vid-url" placeholder="https://youtube.com/... veya video.mp4">
-        </div>
-        <div class="form-group">
-          <label>Açıklama</label>
-          <textarea id="vid-desc" placeholder="Video içeriği hakkında..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Hangi Projeye Eklensin?</label>
-          <select id="vid-proj">
-            <option value="">Bağımsız Video</option>
-          </select>
-        </div>
-        <button class="btn-admin-save" onclick="addVideo()">Video Ekle</button>
-      </div>
-      <div class="content-list" id="vidList"></div>
-    </div>
-
-    <!-- AYARLAR TAB -->
-    <div class="tab-content" id="tab-settings">
-      <div class="admin-form">
-        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#FFE3A1;margin-bottom:.5rem;letter-spacing:.1em;">SİTE AYARLARI</div>
-        <div class="form-group">
-          <label>Site Başlığı</label>
-          <input type="text" id="set-title" value="Colosseum">
-        </div>
-        <div class="form-group">
-          <label>Alt Başlık</label>
-          <input type="text" id="set-sub" value="Belgesel · Kısa Film · Tanıtım">
-        </div>
-        <div class="form-group">
-          <label>E-Posta Adresi</label>
-          <input type="text" id="set-email" value="iletisim@colosseum.com">
-        </div>
-        <div class="form-group">
-          <label>Telefon</label>
-          <input type="text" id="set-phone" value="+90 555 000 0000">
-        </div>
-        <button class="btn-admin-save" onclick="saveSettings()">Kaydet</button>
-      </div>
-    </div>
   </div>
 </div>
 

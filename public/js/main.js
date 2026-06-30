@@ -27,9 +27,6 @@ async function loadData() {
       state = data;
       applySettings();
       renderProjects();
-      renderProjList();
-      renderVidList();
-      refreshVidProjSelect();
     }
   } catch (err) {
     console.error('Veri yüklenemedi:', err);
@@ -212,121 +209,6 @@ window.closeVideoModal = function () {
   setTimeout(resetModal, 250);
 }
 
-/* ─────────────── ADMİN ─────────────── */
-window.openAdmin = function () { document.getElementById('adminOverlay').classList.add('open'); renderProjList(); renderVidList(); refreshVidProjSelect(); fillSettingsForm(); }
-window.closeAdmin = function () { document.getElementById('adminOverlay').classList.remove('open'); }
-window.switchTab = function (name) {
-  document.querySelectorAll('.admin-tab').forEach((t, i) => { t.classList.toggle('active', ['projects', 'videos', 'settings'][i] === name); });
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-}
-function showMsg(id, txt, dur = 2500) { const el = document.getElementById(id); el.textContent = txt; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), dur); }
-
-window.addProject = async function () {
-  const title = document.getElementById('proj-title').value.trim();
-  const tag = document.getElementById('proj-tag').value.trim() || 'Proje';
-  const desc = document.getElementById('proj-desc').value.trim();
-  const video = document.getElementById('proj-video').value.trim();
-  const color = parseInt(document.getElementById('proj-color').value);
-  if (!title) { showMsg('proj-msg', 'Lütfen başlık girin.'); return; }
-
-  try {
-    const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, tag, desc, video, color })
-    });
-    if (res.ok) {
-      const newProj = await res.json();
-      state.projects.push(newProj);
-      renderProjects(); renderProjList(); refreshVidProjSelect();
-      document.getElementById('proj-title').value = ''; document.getElementById('proj-tag').value = ''; document.getElementById('proj-desc').value = ''; document.getElementById('proj-video').value = '';
-      showMsg('proj-msg', 'Proje eklendi.');
-    }
-  } catch (err) { console.error(err); showMsg('proj-msg', 'Hata oluştu.'); }
-}
-
-window.deleteProject = async function (id) {
-  try {
-    const res = await fetch('/api/projects/' + id, { method: 'DELETE' });
-    if (res.ok) {
-      state.projects = state.projects.filter(p => p.id !== id);
-      state.videos.forEach(v => {
-        if (parseInt(v.projId) === id) {
-          v.projId = '';
-        }
-      });
-      renderProjects(); renderProjList(); refreshVidProjSelect();
-    }
-  } catch (err) { console.error(err); }
-}
-
-function renderProjList() {
-  const list = document.getElementById('projList'); list.innerHTML = '';
-  state.projects.forEach(p => {
-    const item = document.createElement('div'); item.className = 'content-item';
-    item.innerHTML = `<div class="content-item-info"><div class="content-item-title">${escapeHTML(p.title)}</div><div class="content-item-meta">${escapeHTML(p.tag)} ${p.video ? '· Video var' : ''}</div></div><div class="content-item-actions"><button class="btn-icon danger" onclick="deleteProject(${p.id})">Sil</button></div>`;
-    list.appendChild(item);
-  });
-}
-
-window.addVideo = async function () {
-  const title = document.getElementById('vid-title').value.trim();
-  const url = document.getElementById('vid-url').value.trim();
-  const desc = document.getElementById('vid-desc').value.trim();
-  const projId = document.getElementById('vid-proj').value;
-  if (!title || !url) { showMsg('vid-msg', 'Başlık ve URL gerekli.'); return; }
-
-  try {
-    const res = await fetch('/api/videos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, url, desc, projId })
-    });
-    if (res.ok) {
-      const newVid = await res.json();
-      state.videos.push(newVid);
-      if (projId) { const proj = state.projects.find(p => p.id == projId); if (proj) proj.video = url; renderProjects(); }
-      renderVidList();
-      document.getElementById('vid-title').value = ''; document.getElementById('vid-url').value = ''; document.getElementById('vid-desc').value = '';
-      showMsg('vid-msg', 'Video eklendi.');
-    }
-  } catch (err) { console.error(err); showMsg('vid-msg', 'Hata oluştu.'); }
-}
-
-window.deleteVideo = async function (id) {
-  try {
-    const res = await fetch('/api/videos/' + id, { method: 'DELETE' });
-    if (res.ok) {
-      const video = state.videos.find(v => v.id === id);
-      if (video && video.projId) {
-        const proj = state.projects.find(p => p.id == video.projId);
-        if (proj && proj.video === video.url) { proj.video = ''; }
-      }
-      state.videos = state.videos.filter(v => v.id !== id);
-      renderVidList(); renderProjects();
-    }
-  } catch (err) { console.error(err); }
-}
-
-function renderVidList() {
-  const list = document.getElementById('vidList'); list.innerHTML = '';
-  state.videos.forEach(v => {
-    const item = document.createElement('div'); item.className = 'content-item';
-    const safeUrl = escapeHTML(v.url); const shortUrl = safeUrl.substring(0, 50) + (safeUrl.length > 50 ? '...' : '');
-    item.innerHTML = `<div class="content-item-info"><div class="content-item-title">${escapeHTML(v.title)}</div><div class="content-item-meta">${shortUrl}</div></div><div class="content-item-actions"><button class="btn-icon" onclick="openVideo('${safeUrl.replace(/'/g, '&#39;')}')">▶</button><button class="btn-icon danger" onclick="deleteVideo(${v.id})">Sil</button></div>`;
-    list.appendChild(item);
-  });
-}
-function refreshVidProjSelect() { const sel = document.getElementById('vid-proj'); sel.innerHTML = '<option value="">Bağımsız Video</option>'; state.projects.forEach(p => { sel.innerHTML += `<option value="${p.id}">${escapeHTML(p.title)}</option>`; }); }
-
-function fillSettingsForm() {
-  document.getElementById('set-title').value = state.settings.title;
-  document.getElementById('set-sub').value = state.settings.sub;
-  document.getElementById('set-email').value = state.settings.email;
-  document.getElementById('set-phone').value = state.settings.phone;
-}
-
 function applySettings() {
   document.querySelector('.hero-title').textContent = state.settings.title;
   document.querySelector('.hero-sub').textContent = state.settings.sub;
@@ -337,27 +219,7 @@ function applySettings() {
   document.title = state.settings.title + ' Film & Media';
 }
 
-window.saveSettings = async function () {
-  const title = document.getElementById('set-title').value.trim() || 'Colosseum';
-  const sub = document.getElementById('set-sub').value.trim() || 'Belgesel · Kısa Film · Tanıtım';
-  const email = document.getElementById('set-email').value.trim() || 'contact@colosseum.com';
-  const phone = document.getElementById('set-phone').value.trim() || '888-888-88';
-  
-  try {
-    const res = await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, sub, email, phone })
-    });
-    if (res.ok) {
-      state.settings = await res.json();
-      applySettings();
-      alert('Ayarlar kaydedildi.');
-    }
-  } catch (err) { console.error(err); alert('Hata oluştu.'); }
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAdmin(); closeVideoModal(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeVideoModal(); } });
 
 // Start the app by fetching data
 loadData();
