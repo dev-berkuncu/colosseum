@@ -2,7 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { kv } = require('@vercel/kv');
+const { createClient } = require('@vercel/kv');
+
+const kv = createClient({
+  url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN,
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,8 +47,8 @@ const readDB = async () => {
 // Helper function to write DB
 const writeDB = async (data) => {
   try {
-    if (!process.env.KV_REST_API_URL) {
-      throw new Error('Vercel KV (Redis) bağlantısı kurulamadı. Lütfen Vercel panelinden KV eklediğinizden emin olun.');
+    if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.KV_REST_API_URL) {
+      throw new Error('Upstash Redis bağlantısı kurulamadı. Lütfen Vercel panelinden veritabanını bağladığınızdan emin olun.');
     }
     await kv.set('colosseum_data', data);
   } catch (err) {
