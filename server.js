@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
+const mysql = require('mysql2/promise');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,50 +11,37 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Fallback user and pass
+// Fallback user and pass for Admin Panel
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'colosseum123';
 const ADMIN_TOKEN = 'tok_' + Buffer.from(ADMIN_USER + ':' + ADMIN_PASS).toString('base64');
 
-const DB_FILE = path.join(__dirname, 'data', 'database.json');
+// MySQL Connection Pool
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'colosseum',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-// Helper function to read DB from local file
-const readDB = () => {
+// Helper to initialize default settings if missing
+const initSettings = async () => {
   try {
-    if (fs.existsSync(DB_FILE)) {
-      const data = fs.readFileSync(DB_FILE, 'utf8');
-      return JSON.parse(data);
+    const [rows] = await pool.query('SELECT * FROM settings WHERE id = 1');
+    if (rows.length === 0) {
+      await pool.query(
+        'INSERT INTO settings (id, title, sub, email, phone) VALUES (1, ?, ?, ?, ?)',
+        ['Colosseum', 'Belgesel · Kısa Film · Tanıtım', 'contact@colosseum.com', '888-888-88']
+      );
     }
   } catch (err) {
-    console.error('Error reading database file:', err);
-  }
-  return { 
-    projects: [], 
-    videos: [], 
-    settings: {
-      title: 'Colosseum',
-      sub: 'Belgesel · Kısa Film · Tanıtım',
-      email: 'contact@colosseum.com',
-      phone: '888-888-88'
-    }, 
-    nextId: 1 
-  };
-};
-
-// Helper function to write DB to local file
-const writeDB = (data) => {
-  try {
-    // Ensure data directory exists
-    const dir = path.dirname(DB_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing database file:', err);
-    throw new Error('Dosyaya yazma işlemi başarısız oldu. Sunucu izinlerini kontrol edin.');
+    console.error('MySQL Settings Initialization Error:', err);
   }
 };
+initSettings();
 
 // --- Auth Middleware ---
 const requireAuth = (req, res, next) => {
@@ -84,109 +71,72 @@ app.get('/admin', (req, res) => {
 });
 
 // Get all data (for initial load)
-app.get('/api/data', (req, res) => {
-  const data = readDB();
-  res.json(data);
+app.get('/api/data', async (req, res) => {
+  try {
+    const [projects] = await pool.query('SELECT id, title, tag, description AS `desc`, video, color FROM projects ORDER BY id DESC');
+    const [settingsRows] = await pool.query('SELECT * FROM settings WHERE id = 1');
+    
+    res.json({
+      projects,
+      videos: [], // We merged videos into projects schema for simplicity
+      settings: settingsRows[0] || {}
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Veritabanı bağlantı hatası.' });
+  }
 });
 
 // Projects
-app.post('/api/projects', requireAuth, (req, res) => {
+app.post('/api/projects', requireAuth, async (req, res) => {
   try {
-    const db = readDB();
     const { title, tag, desc, video, color } = req.body;
-    const newProject = {
-      id: db.nextId++,
-      title,
-      tag: tag || 'Proje',
-      desc,
-      video: video || '',
-      color: parseInt(color) || 0
-    };
-    db.projects.push(newProject);
-    writeDB(db);
-    res.status(201).json(newProject);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/api/projects/:id', requireAuth, (req, res) => {
-  try {
-    const db = readDB();
-    const id = parseInt(req.params.id);
-    db.projects = db.projects.filter(p => p.id !== id);
+    const finalColor = parseInt(color) || 0;
+    const finalTag = tag || 'Proje';
+    const finalVideo = video || '';
     
-    // Update videos that might have been linked to this project
-    db.videos.forEach(v => {
-      if (parseInt(v.projId) === id) {
-        v.projId = '';
-      }
+    const [result] = await pool.query(
+      'INSERT INTO projects (title, tag, description, video, color) VALUES (?, ?, ?, ?, ?)',
+      [title, finalTag, desc, finalVideo, finalColor]
+    );
+    
+    res.status(201).json({
+      id: result.insertId,
+      title,
+      tag: finalTag,
+      desc,
+      video: finalVideo,
+      color: finalColor
     });
-
-    writeDB(db);
-    res.sendStatus(204);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Veritabanına kaydedilemedi.' });
   }
 });
 
-// Videos
-app.post('/api/videos', requireAuth, (req, res) => {
+app.delete('/api/projects/:id', requireAuth, async (req, res) => {
   try {
-    const db = readDB();
-    const { title, url, desc, projId } = req.body;
-    const newVideo = {
-      id: db.nextId++,
-      title,
-      url,
-      desc,
-      projId
-    };
-    db.videos.push(newVideo);
-    
-    if (projId) {
-      const proj = db.projects.find(p => p.id == projId);
-      if (proj) proj.video = url;
-    }
-    
-    writeDB(db);
-    res.status(201).json(newVideo);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/api/videos/:id', requireAuth, (req, res) => {
-  try {
-    const db = readDB();
     const id = parseInt(req.params.id);
-    
-    const video = db.videos.find(v => v.id === id);
-    if (video && video.projId) {
-      const proj = db.projects.find(p => p.id == video.projId);
-      if (proj && proj.video === video.url) {
-        proj.video = ''; // Clear video reference from project
-      }
-    }
-
-    db.videos = db.videos.filter(v => v.id !== id);
-    writeDB(db);
+    await pool.query('DELETE FROM projects WHERE id = ?', [id]);
     res.sendStatus(204);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Veritabanından silinemedi.' });
   }
 });
 
 // Settings
-app.post('/api/settings', requireAuth, (req, res) => {
+app.post('/api/settings', requireAuth, async (req, res) => {
   try {
-    const db = readDB();
     const { title, sub, email, phone } = req.body;
-    db.settings = { title, sub, email, phone };
-    writeDB(db);
-    res.json(db.settings);
+    await pool.query(
+      'UPDATE settings SET title = ?, sub = ?, email = ?, phone = ? WHERE id = 1',
+      [title, sub, email, phone]
+    );
+    res.json({ title, sub, email, phone });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Ayarlar güncellenemedi.' });
   }
 });
 
