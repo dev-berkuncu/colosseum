@@ -9,7 +9,7 @@ const DB_FILE = path.join(__dirname, 'data', 'database.json');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper function to read DB
 const readDB = () => {
@@ -120,6 +120,10 @@ app.post('/api/settings', (req, res) => {
   res.json(db.settings);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
