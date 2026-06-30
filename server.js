@@ -70,6 +70,11 @@ app.post('/api/login', (req, res) => {
   }
 });
 
+// Admin Page Route
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Get all data (for initial load)
 app.get('/api/data', async (req, res) => {
   const data = await readDB();
