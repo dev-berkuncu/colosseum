@@ -1,47 +1,49 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
 const path = require('path');
+const { kv } = require('@vercel/kv');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'data', 'database.json');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper function to read DB
-const readDB = () => {
+const readDB = async () => {
   try {
-    const data = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(data);
+    const data = await kv.get('colosseum_data');
+    if (data) {
+      return typeof data === 'string' ? JSON.parse(data) : data;
+    }
   } catch (err) {
-    console.error('Error reading database:', err);
-    return { projects: [], videos: [], settings: {}, nextId: 1 };
+    console.error('Error reading database from KV:', err);
   }
+  return { projects: [], videos: [], settings: {}, nextId: 1 };
 };
 
 // Helper function to write DB
-const writeDB = (data) => {
+const writeDB = async (data) => {
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+    await kv.set('colosseum_data', data);
   } catch (err) {
-    console.error('Error writing database:', err);
+    console.error('Error writing database to KV:', err);
   }
 };
 
 // --- API Endpoints ---
 
 // Get all data (for initial load)
-app.get('/api/data', (req, res) => {
-  const data = readDB();
+app.get('/api/data', async (req, res) => {
+  const data = await readDB();
   res.json(data);
 });
 
 // Projects
-app.post('/api/projects', (req, res) => {
-  const db = readDB();
+app.post('/api/projects', async (req, res) => {
+  const db = await readDB();
   const { title, tag, desc, video, color } = req.body;
   const newProject = {
     id: db.nextId++,
@@ -52,12 +54,12 @@ app.post('/api/projects', (req, res) => {
     color: parseInt(color) || 0
   };
   db.projects.push(newProject);
-  writeDB(db);
+  await writeDB(db);
   res.status(201).json(newProject);
 });
 
-app.delete('/api/projects/:id', (req, res) => {
-  const db = readDB();
+app.delete('/api/projects/:id', async (req, res) => {
+  const db = await readDB();
   const id = parseInt(req.params.id);
   db.projects = db.projects.filter(p => p.id !== id);
   
@@ -68,13 +70,13 @@ app.delete('/api/projects/:id', (req, res) => {
     }
   });
 
-  writeDB(db);
+  await writeDB(db);
   res.sendStatus(204);
 });
 
 // Videos
-app.post('/api/videos', (req, res) => {
-  const db = readDB();
+app.post('/api/videos', async (req, res) => {
+  const db = await readDB();
   const { title, url, desc, projId } = req.body;
   const newVideo = {
     id: db.nextId++,
@@ -90,12 +92,12 @@ app.post('/api/videos', (req, res) => {
     if (proj) proj.video = url;
   }
   
-  writeDB(db);
+  await writeDB(db);
   res.status(201).json(newVideo);
 });
 
-app.delete('/api/videos/:id', (req, res) => {
-  const db = readDB();
+app.delete('/api/videos/:id', async (req, res) => {
+  const db = await readDB();
   const id = parseInt(req.params.id);
   
   const video = db.videos.find(v => v.id === id);
@@ -107,16 +109,16 @@ app.delete('/api/videos/:id', (req, res) => {
   }
 
   db.videos = db.videos.filter(v => v.id !== id);
-  writeDB(db);
+  await writeDB(db);
   res.sendStatus(204);
 });
 
 // Settings
-app.post('/api/settings', (req, res) => {
-  const db = readDB();
+app.post('/api/settings', async (req, res) => {
+  const db = await readDB();
   const { title, sub, email, phone, loc } = req.body;
   db.settings = { title, sub, email, phone, loc };
-  writeDB(db);
+  await writeDB(db);
   res.json(db.settings);
 });
 
