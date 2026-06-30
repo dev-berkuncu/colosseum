@@ -2,12 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { createClient } = require('@vercel/kv');
-
-const kv = createClient({
-  url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN,
-});
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,15 +16,17 @@ const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'colosseum123';
 const ADMIN_TOKEN = 'tok_' + Buffer.from(ADMIN_USER + ':' + ADMIN_PASS).toString('base64');
 
-// Helper function to read DB
-const readDB = async () => {
+const DB_FILE = path.join(__dirname, 'data', 'database.json');
+
+// Helper function to read DB from local file
+const readDB = () => {
   try {
-    const data = await kv.get('colosseum_data');
-    if (data) {
-      return typeof data === 'string' ? JSON.parse(data) : data;
+    if (fs.existsSync(DB_FILE)) {
+      const data = fs.readFileSync(DB_FILE, 'utf8');
+      return JSON.parse(data);
     }
   } catch (err) {
-    console.error('Error reading database from KV:', err);
+    console.error('Error reading database file:', err);
   }
   return { 
     projects: [], 
@@ -44,16 +41,18 @@ const readDB = async () => {
   };
 };
 
-// Helper function to write DB
-const writeDB = async (data) => {
+// Helper function to write DB to local file
+const writeDB = (data) => {
   try {
-    if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.KV_REST_API_URL) {
-      throw new Error('Upstash Redis bağlantısı kurulamadı. Lütfen Vercel panelinden veritabanını bağladığınızdan emin olun.');
+    // Ensure data directory exists
+    const dir = path.dirname(DB_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
-    await kv.set('colosseum_data', data);
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error writing database to KV:', err);
-    throw err;
+    console.error('Error writing database file:', err);
+    throw new Error('Dosyaya yazma işlemi başarısız oldu. Sunucu izinlerini kontrol edin.');
   }
 };
 
@@ -85,15 +84,15 @@ app.get('/admin', (req, res) => {
 });
 
 // Get all data (for initial load)
-app.get('/api/data', async (req, res) => {
-  const data = await readDB();
+app.get('/api/data', (req, res) => {
+  const data = readDB();
   res.json(data);
 });
 
 // Projects
-app.post('/api/projects', requireAuth, async (req, res) => {
+app.post('/api/projects', requireAuth, (req, res) => {
   try {
-    const db = await readDB();
+    const db = readDB();
     const { title, tag, desc, video, color } = req.body;
     const newProject = {
       id: db.nextId++,
@@ -104,16 +103,16 @@ app.post('/api/projects', requireAuth, async (req, res) => {
       color: parseInt(color) || 0
     };
     db.projects.push(newProject);
-    await writeDB(db);
+    writeDB(db);
     res.status(201).json(newProject);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/projects/:id', requireAuth, async (req, res) => {
+app.delete('/api/projects/:id', requireAuth, (req, res) => {
   try {
-    const db = await readDB();
+    const db = readDB();
     const id = parseInt(req.params.id);
     db.projects = db.projects.filter(p => p.id !== id);
     
@@ -124,7 +123,7 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
       }
     });
 
-    await writeDB(db);
+    writeDB(db);
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -132,9 +131,9 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
 });
 
 // Videos
-app.post('/api/videos', requireAuth, async (req, res) => {
+app.post('/api/videos', requireAuth, (req, res) => {
   try {
-    const db = await readDB();
+    const db = readDB();
     const { title, url, desc, projId } = req.body;
     const newVideo = {
       id: db.nextId++,
@@ -150,16 +149,16 @@ app.post('/api/videos', requireAuth, async (req, res) => {
       if (proj) proj.video = url;
     }
     
-    await writeDB(db);
+    writeDB(db);
     res.status(201).json(newVideo);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/videos/:id', requireAuth, async (req, res) => {
+app.delete('/api/videos/:id', requireAuth, (req, res) => {
   try {
-    const db = await readDB();
+    const db = readDB();
     const id = parseInt(req.params.id);
     
     const video = db.videos.find(v => v.id === id);
@@ -171,7 +170,7 @@ app.delete('/api/videos/:id', requireAuth, async (req, res) => {
     }
 
     db.videos = db.videos.filter(v => v.id !== id);
-    await writeDB(db);
+    writeDB(db);
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -179,22 +178,21 @@ app.delete('/api/videos/:id', requireAuth, async (req, res) => {
 });
 
 // Settings
-app.post('/api/settings', requireAuth, async (req, res) => {
+app.post('/api/settings', requireAuth, (req, res) => {
   try {
-    const db = await readDB();
+    const db = readDB();
     const { title, sub, email, phone } = req.body;
     db.settings = { title, sub, email, phone };
-    await writeDB(db);
+    writeDB(db);
     res.json(db.settings);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-}
+// Always listen for Hostinger/cPanel to proxy the application
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 module.exports = app;
