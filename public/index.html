@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colosseum Film & Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">COLOSSEUM</a>
+  <ul class="nav-links">
+    <li><a href="#hakkimizda">Hakkımızda</a></li>
+    <li><a href="#projeler">Projeler</a></li>
+    <li><a href="#hizmetler">Hizmetler</a></li>
+    <li><a href="#iletisim">İletişim</a></li>
+  </ul>
+  <button class="nav-admin" onclick="openAdmin()">⚙ Admin</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-sun"></div>
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-haze"></div>
+  <div class="hero-title-wrap">
+    <p class="hero-kicker">Film & Media</p>
+    <h1 class="hero-title">COLOSSEUM</h1>
+    <p class="hero-sub">Belgesel · Kısa Film · Tanıtım</p>
+    <div class="hero-cta">
+      <a class="btn-hero primary" href="#projeler">Projeleri Gör</a>
+      <a class="btn-hero" href="#iletisim">İletişime Geç</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Keşfet</span>
+  </div>
+</section>
+
+<!-- HAKKIMIZDA -->
+<div class="section-divider"></div>
+<section id="hakkimizda" class="section">
+  <div id="yaprak-container"></div>
+  <div class="about-grid">
+    <div class="reveal">
+      <p class="section-eyebrow">Hakkımızda</p>
+      <h2 class="section-title">Antik Bir Ruh,<br>Modern Bir Anlatım</h2>
+      <p class="section-body">
+        Colosseum Film & Media; belgesel, kısa film, mekan tanıtımı ve marka iş birlikleri için sinematik işler üreten yaratıcı bir medya stüdyosudur. Colosseum temasının anıtsal gücünü korurken, her projeye daha sıcak, daha görünür ve daha prestijli bir vitrin sunar.
+      </p>
+      <div class="accent-line"></div>
+      <div class="stats-row">
+        <div class="stat reveal">
+          <div class="stat-num">47+</div>
+          <div class="stat-label">Tamamlanan Proje</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-num">8 Yıl</div>
+          <div class="stat-label">Deneyim</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Memnuniyet</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-image reveal">
+      <div class="about-image-inner"><strong>C</strong><span>FILM & MEDIA</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJELER -->
+<div class="section-divider"></div>
+<section id="projeler" class="section">
+  <div class="section-head">
+    <p class="section-eyebrow reveal">Portföy</p>
+    <h2 class="section-title reveal">Seçili Eserler</h2>
+    <p class="section-body reveal">Belgesellerden tanıtım filmlerine, kurum çalışmalarından kısa film projelerine kadar Colosseum imzası taşıyan işleri burada sergileyebilirsin.</p>
+  </div>
+  <div class="projects-grid" id="projectsGrid">
+    <!-- JS tarafından doldurulur -->
+  </div>
+</section>
+
+<!-- HİZMETLER -->
+<div class="section-divider"></div>
+<section id="hizmetler" class="section">
+  <div class="section-head">
+    <p class="section-eyebrow reveal">Hizmetler</p>
+    <h2 class="section-title reveal">Sunduklarımız</h2>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-num">I</div>
+      <div class="service-name">Belgesel & Hikâye Anlatımı</div>
+      <p class="service-desc">Doğa, şehir, kurum ve karakter odaklı belgeseller için araştırma, çekim kurgusu ve sinematik anlatım.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">II</div>
+      <div class="service-name">Tanıtım Filmi</div>
+      <p class="service-desc">Mekan, marka, etkinlik ve kurumlar için prestijli, net ve akılda kalan tanıtım videoları.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">III</div>
+      <div class="service-name">Kurgu & Motion</div>
+      <p class="service-desc">Fragman, jenerik, logo animasyonu, renk düzenleme ve final sunuma hazır video paketleri.</p>
+    </div>
+  </div>
+</section>
+
+<!-- İLETİŞİM -->
+<div class="section-divider"></div>
+<section id="iletisim" class="section">
+  <div class="contact-wrap">
+    <div class="reveal">
+      <p class="section-eyebrow">İletişim</p>
+      <h2 class="section-title">Birlikte<br>Bir Eser Üretelim</h2>
+      <p class="section-body">Projenizi hayata geçirmek için hazırız. Vizyonunuzu paylaşın, Colosseum diliyle güçlü bir görsel anlatıya dönüştürelim.</p>
+      <div style="margin-top:2rem;">
+        <div class="contact-item">
+          <div class="contact-icon">✉</div>
+          <div>
+            <div class="contact-label">E-Posta</div>
+            <div class="contact-val" id="contactEmail">iletisim@colosseum.com</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">☎</div>
+          <div>
+            <div class="contact-label">Telefon</div>
+            <div class="contact-val" id="contactPhone">+90 555 000 0000</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">◉</div>
+          <div>
+            <div class="contact-label">Konum</div>
+            <div class="contact-val" id="contactLoc">İstanbul, Türkiye</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form class="contact-form reveal" onsubmit="return false;">
+      <div class="form-group">
+        <label>Adınız</label>
+        <input type="text" placeholder="Adınız Soyadınız">
+      </div>
+      <div class="form-group">
+        <label>E-Posta</label>
+        <input type="email" placeholder="iletisim@ornek.com">
+      </div>
+      <div class="form-group">
+        <label>Mesajınız</label>
+        <textarea placeholder="Projenizden bahsedin..."></textarea>
+      </div>
+      <button class="btn-submit">Mesaj Gönder</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">COLOSSEUM</div>
+  <div class="footer-copy">© 2026 Colosseum Film & Media. Tüm hakları saklıdır.</div>
+</footer>
+
+<!-- VİDEO MODAL -->
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-inner" id="videoModalInner">
+    <button class="video-modal-close" onclick="closeVideoModal()">✕ KAPAT</button>
+    <video id="modalVideo" controls></video>
+  </div>
+</div>
+
+<!-- ADMİN PANELİ -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <div class="admin-title">Admin Paneli</div>
+      <button class="admin-close" onclick="closeAdmin()">✕ Kapat</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchTab('projects')">Projeler</button>
+      <button class="admin-tab" onclick="switchTab('videos')">Videolar</button>
+      <button class="admin-tab" onclick="switchTab('settings')">Ayarlar</button>
+    </div>
+
+    <!-- PROJELER TAB -->
+    <div class="tab-content active" id="tab-projects">
+      <div class="msg-box" id="proj-msg"></div>
+      <div class="admin-form">
+        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#FFE3A1;margin-bottom:.5rem;letter-spacing:.1em;">YENİ PROJE EKLE</div>
+        <div class="form-group">
+          <label>Proje Başlığı</label>
+          <input type="text" id="proj-title" placeholder="Proje adı...">
+        </div>
+        <div class="form-group">
+          <label>Kategori / Etiket</label>
+          <input type="text" id="proj-tag" placeholder="Belgesel, Kısa Film, Tanıtım...">
+        </div>
+        <div class="form-group">
+          <label>Kısa Açıklama</label>
+          <textarea id="proj-desc" placeholder="Proje hakkında kısa bilgi..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Video URL (isteğe bağlı)</label>
+          <input type="text" id="proj-video" placeholder="https://... veya boş bırakın">
+        </div>
+        <div class="form-group">
+          <label>Arka Plan Rengi</label>
+          <select id="proj-color">
+            <option value="0">Gün Batımı Taşı</option>
+            <option value="1">Zeytin Yeşili</option>
+            <option value="2">Roma Kırmızısı</option>
+            <option value="3">Akdeniz Mavisi</option>
+            <option value="4">Altın Kum</option>
+          </select>
+        </div>
+        <button class="btn-admin-save" onclick="addProject()">Proje Ekle</button>
+      </div>
+      <div class="content-list" id="projList"></div>
+    </div>
+
+    <!-- VİDEOLAR TAB -->
+    <div class="tab-content" id="tab-videos">
+      <div class="msg-box" id="vid-msg"></div>
+      <div class="admin-form">
+        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#FFE3A1;margin-bottom:.5rem;letter-spacing:.1em;">VİDEO EKLE</div>
+        <div class="form-group">
+          <label>Video Başlığı</label>
+          <input type="text" id="vid-title" placeholder="Video adı...">
+        </div>
+        <div class="form-group">
+          <label>Video URL veya Dosya Yolu</label>
+          <input type="text" id="vid-url" placeholder="https://youtube.com/... veya video.mp4">
+        </div>
+        <div class="form-group">
+          <label>Açıklama</label>
+          <textarea id="vid-desc" placeholder="Video içeriği hakkında..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Hangi Projeye Eklensin?</label>
+          <select id="vid-proj">
+            <option value="">Bağımsız Video</option>
+          </select>
+        </div>
+        <button class="btn-admin-save" onclick="addVideo()">Video Ekle</button>
+      </div>
+      <div class="content-list" id="vidList"></div>
+    </div>
+
+    <!-- AYARLAR TAB -->
+    <div class="tab-content" id="tab-settings">
+      <div class="admin-form">
+        <div style="font-family:'Cinzel',serif;font-size:.85rem;color:#FFE3A1;margin-bottom:.5rem;letter-spacing:.1em;">SİTE AYARLARI</div>
+        <div class="form-group">
+          <label>Site Başlığı</label>
+          <input type="text" id="set-title" value="Colosseum">
+        </div>
+        <div class="form-group">
+          <label>Alt Başlık</label>
+          <input type="text" id="set-sub" value="Belgesel · Kısa Film · Tanıtım">
+        </div>
+        <div class="form-group">
+          <label>E-Posta Adresi</label>
+          <input type="text" id="set-email" value="iletisim@colosseum.com">
+        </div>
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="text" id="set-phone" value="+90 555 000 0000">
+        </div>
+        <div class="form-group">
+          <label>Konum</label>
+          <input type="text" id="set-loc" value="İstanbul, Türkiye">
+        </div>
+        <button class="btn-admin-save" onclick="saveSettings()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
