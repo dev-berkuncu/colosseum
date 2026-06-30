@@ -4,6 +4,8 @@ let token = localStorage.getItem('col_admin_token');
 // Auto check on load
 if (token) {
   showDashboard();
+} else {
+  document.getElementById('login-section').style.display = 'block';
 }
 
 async function login() {
