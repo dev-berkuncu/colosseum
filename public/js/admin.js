@@ -105,7 +105,7 @@ function fillSettings(settings) {
 }
 
 // --- Data Modification ---
-async function addProject() {
+async function addProject(event) {
   const title = document.getElementById('p-title').value.trim();
   const tag = document.getElementById('p-tag').value.trim();
   const video = document.getElementById('p-video').value.trim();
@@ -113,7 +113,8 @@ async function addProject() {
   
   if (!title) return alert('Lütfen proje başlığı girin');
   
-  const btn = event.target;
+  const btn = event ? event.target : document.querySelector('button');
+  const oldText = btn.textContent;
   btn.textContent = 'Ekleniyor...';
   
   try {
@@ -129,11 +130,14 @@ async function addProject() {
       document.getElementById('p-video').value = '';
       document.getElementById('p-desc').value = '';
       loadData();
+    } else {
+      const err = await res.json();
+      alert('Hata: ' + (err.error || 'Bilinmeyen bir hata oluştu.'));
     }
   } catch (e) {
-    alert(e.message);
+    alert('Bağlantı hatası: ' + e.message);
   } finally {
-    btn.textContent = 'Projeyi Ekle';
+    if (btn) btn.textContent = oldText;
   }
 }
 
@@ -147,13 +151,14 @@ async function deleteProject(id) {
   }
 }
 
-async function saveSettings() {
+async function saveSettings(event) {
   const title = document.getElementById('s-title').value.trim();
   const sub = document.getElementById('s-sub').value.trim();
   const email = document.getElementById('s-email').value.trim();
   const phone = document.getElementById('s-phone').value.trim();
   
-  const btn = event.target;
+  const btn = event ? event.target : document.querySelector('button');
+  const oldText = btn.textContent;
   btn.textContent = 'Kaydediliyor...';
   
   try {
@@ -165,10 +170,10 @@ async function saveSettings() {
     
     if (res.ok) {
       btn.textContent = 'Kaydedildi ✓';
-      setTimeout(() => btn.textContent = 'Ayarları Kaydet', 2000);
+      setTimeout(() => btn.textContent = oldText, 2000);
     }
   } catch (e) {
     alert(e.message);
-    btn.textContent = 'Ayarları Kaydet';
+    btn.textContent = oldText;
   }
 }
