@@ -210,27 +210,56 @@ function escapeHTML(str = '') {
   return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 function renderProjects() {
-  const grid = document.getElementById('projectsGrid'); grid.innerHTML = '';
+  const container = document.getElementById('projectsContainer'); 
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const groups = {};
   state.projects.forEach(p => {
-    let bgStyle = `background:${COLORS[p.color] || COLORS[0]}`;
-    if (p.video && (p.video.includes('youtube') || p.video.includes('youtu.be'))) {
-      const yid = youtubeId(p.video);
-      bgStyle = `background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('https://img.youtube.com/vi/${yid}/maxresdefault.jpg') center/cover no-repeat`;
-    }
+    const tag = (p.tag && p.tag.trim() !== '') ? p.tag.trim() : 'Diğer';
+    if (!groups[tag]) groups[tag] = [];
+    groups[tag].push(p);
+  });
 
-    const card = document.createElement('div');
-    card.className = 'project-card reveal' + (p.video ? ' has-video' : '');
-    card.innerHTML = `
-      <div class="project-card-bg" style="${bgStyle}"></div>
-      <div class="project-card-overlay">
-        <div class="project-tag">${escapeHTML(p.tag)}</div>
-        <div class="project-title">${escapeHTML(p.title)}</div>
-        <div class="project-desc">${escapeHTML(p.desc)}</div>
-      </div>
-      <div class="project-video-indicator ${p.video ? '' : 'hidden'}">▶</div>
-    `;
-    if (p.video) { card.addEventListener('click', () => openVideo(p.video)); }
-    grid.appendChild(card); observer.observe(card);
+  const sortedTags = Object.keys(groups).sort();
+  
+  sortedTags.forEach(tag => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'project-group';
+    
+    const groupTitle = document.createElement('h3');
+    groupTitle.className = 'project-group-title reveal';
+    groupTitle.textContent = tag.toUpperCase();
+    groupDiv.appendChild(groupTitle);
+    
+    const grid = document.createElement('div');
+    grid.className = 'projects-grid';
+    
+    groups[tag].forEach(p => {
+      let bgStyle = `background:${COLORS[p.color] || COLORS[0]}`;
+      if (p.video && (p.video.includes('youtube') || p.video.includes('youtu.be'))) {
+        const yid = youtubeId(p.video);
+        bgStyle = `background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('https://img.youtube.com/vi/${yid}/maxresdefault.jpg') center/cover no-repeat`;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'project-card reveal' + (p.video ? ' has-video' : '');
+      card.innerHTML = `
+        <div class="project-card-bg" style="${bgStyle}"></div>
+        <div class="project-card-overlay">
+          <div class="project-tag">${escapeHTML(p.tag)}</div>
+          <div class="project-title">${escapeHTML(p.title)}</div>
+          <div class="project-desc">${escapeHTML(p.desc)}</div>
+        </div>
+        <div class="project-video-indicator ${p.video ? '' : 'hidden'}">▶</div>
+      `;
+      if (p.video) { card.addEventListener('click', () => openVideo(p.video)); }
+      grid.appendChild(card); observer.observe(card);
+    });
+    
+    groupDiv.appendChild(grid);
+    container.appendChild(groupDiv);
+    observer.observe(groupTitle);
   });
 }
 

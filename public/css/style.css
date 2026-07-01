@@ -232,7 +232,13 @@ nav.scrolled .nav-admin{background:rgba(122,85,32,.06);color:var(--gold-dark);bo
   background:
     linear-gradient(180deg,#E6CFA0,#F6E8C9 34%,#EBD8AE 100%);
 }
-.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.35rem;margin-top:3.5rem;}
+.project-group{margin-top:4rem;}
+.project-group-title{
+  font-family:'Cinzel',serif;font-size:1.8rem;color:#4A2B16;
+  margin-bottom:1.5rem;padding-bottom:0.5rem;
+  border-bottom:1px solid rgba(122,85,32,.2);
+}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.35rem;}
 .project-card{
   background:var(--stone);position:relative;aspect-ratio:16/10;overflow:hidden;cursor:pointer;
   border:1px solid rgba(122,85,32,.28);transition:border-color .3s,transform .3s,box-shadow .3s;
