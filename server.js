@@ -35,7 +35,7 @@ const initSettings = async () => {
     if (rows.length === 0) {
       await pool.query(
         'INSERT INTO settings (id, title, sub, email, phone) VALUES (1, ?, ?, ?, ?)',
-        ['Colosseum', 'Belgesel · Kısa Film · Tanıtım', 'contact@colosseum.com', '888-888-88']
+        ['Colosseum', 'Belgesel · Kısa Film · Tanıtım · Sinematik', 'contact@colosseum.com', '888-888-88']
       );
     }
   } catch (err) {
