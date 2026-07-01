@@ -109,18 +109,17 @@ function drawCamera() {
   const th = H * .22; // tripod height
   const topY = ty - th;
 
-  // Beam
+  // Beam (Shining left/straight across)
   const scrollAmt = Math.min(window.scrollY / (window.innerHeight * 0.6), 1);
   if (scrollAmt > 0) {
-    const beam = ctx.createLinearGradient(tx - 35, topY - 20, W * 0.3, H);
+    const beam = ctx.createLinearGradient(tx - 35, topY - 20, 0, topY - 20);
     beam.addColorStop(0, `rgba(255, 240, 180, ${0.45 * scrollAmt})`);
     beam.addColorStop(1, `rgba(255, 240, 180, 0)`);
     ctx.fillStyle = beam;
     ctx.beginPath();
     ctx.moveTo(tx - 35, topY - 20); // lens center
-    ctx.lineTo(0, H - 200);
-    ctx.lineTo(0, H);
-    ctx.lineTo(W, H);
+    ctx.lineTo(0, topY - 180); // upper left
+    ctx.lineTo(0, topY + 120); // lower left
     ctx.fill();
   }
 
