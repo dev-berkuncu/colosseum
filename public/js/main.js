@@ -74,7 +74,11 @@ function drawColosseum(t) {
     const archW = cW / n;
     for (let i = 0; i < n; i++) {
       const ax = cX + i * archW;
-      const light = (i / n) * 18;
+      
+      // Işık dalgalanması (duvarların hareketli görünmesi için)
+      const wave = Math.sin(t * 2.5 + (i + li * 2) * 0.6) * 15;
+      const light = (i / n) * 18 + wave;
+      
       const stone = ctx.createLinearGradient(ax, ly, ax + archW, ly + lh);
       stone.addColorStop(0, `rgba(${151 + light - li * 10},${119 + light - li * 6},${78 + light - li * 4},.94)`);
       stone.addColorStop(.5, `rgba(${188 + light - li * 12},${151 + light - li * 8},${94 + light - li * 6},.9)`);
@@ -88,7 +92,10 @@ function drawColosseum(t) {
       const archY = ly + lh * .12;
       const rx = archInnerW / 2;
       ctx.beginPath(); ctx.moveTo(archX, archY + archInnerH); ctx.lineTo(archX, archY + rx); ctx.arc(archX + rx, archY + rx, rx, Math.PI, 0); ctx.lineTo(archX + archInnerW, archY + archInnerH); ctx.closePath();
-      ctx.fillStyle = `rgba(54,31,18,${.78 - li * .05})`; ctx.fill();
+      
+      // Kemer içindeki karanlığın nefes alması
+      const innerWave = Math.sin(t * 1.8 + i * 0.5) * 0.12;
+      ctx.fillStyle = `rgba(54,31,18,${.78 - li * .05 + innerWave})`; ctx.fill();
       ctx.strokeStyle = 'rgba(255,236,176,.18)'; ctx.lineWidth = .6; ctx.stroke();
 
       ctx.strokeStyle = 'rgba(70,44,24,.18)'; ctx.lineWidth = .7; ctx.strokeRect(ax, ly, archW, lh);
