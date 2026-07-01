@@ -85,7 +85,7 @@ function renderProjects(projects) {
     return;
   }
   
-  projects.reverse().forEach(p => {
+  projects.forEach(p => {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
@@ -93,7 +93,10 @@ function renderProjects(projects) {
         <div class="item-title">${p.title || 'İsimsiz Proje'}</div>
         <div class="item-meta">${p.tag} • ${p.video ? 'Videolu' : 'Videsuz'}</div>
       </div>
-      <button class="danger" onclick="deleteProject(${p.id})">Sil</button>
+      <div style="display:flex; gap:8px;">
+        <button class="logout-btn" style="padding:6px 12px; font-size:0.8rem;" onclick='startEdit(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Düzenle</button>
+        <button class="danger" onclick="deleteProject(${p.id})">Sil</button>
+      </div>
     `;
     list.appendChild(item);
   });
@@ -107,7 +110,34 @@ function fillSettings(settings) {
 }
 
 // --- Data Modification ---
-async function addProject(event) {
+function startEdit(p) {
+  document.getElementById('p-id').value = p.id;
+  document.getElementById('p-title').value = p.title;
+  document.getElementById('p-tag').value = p.tag;
+  document.getElementById('p-video').value = p.video;
+  document.getElementById('p-desc').value = p.desc;
+  
+  document.getElementById('btn-submit-project').textContent = 'Değişiklikleri Kaydet';
+  document.getElementById('btn-submit-project').style.background = '#3b82f6';
+  document.getElementById('btn-cancel-edit').style.display = 'block';
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  document.getElementById('p-id').value = '';
+  document.getElementById('p-title').value = '';
+  document.getElementById('p-tag').value = '';
+  document.getElementById('p-video').value = '';
+  document.getElementById('p-desc').value = '';
+  
+  document.getElementById('btn-submit-project').textContent = 'Projeyi Yayımla';
+  document.getElementById('btn-submit-project').style.background = 'var(--gold)';
+  document.getElementById('btn-cancel-edit').style.display = 'none';
+}
+
+async function saveProject(event) {
+  const id = document.getElementById('p-id').value;
   const title = document.getElementById('p-title').value.trim();
   const tag = document.getElementById('p-tag').value.trim();
   const video = document.getElementById('p-video').value.trim();
@@ -117,20 +147,20 @@ async function addProject(event) {
   
   const btn = event ? event.target : document.querySelector('button');
   const oldText = btn.textContent;
-  btn.textContent = 'Ekleniyor...';
+  btn.textContent = 'İşleniyor...';
   
   try {
-    const res = await authFetch('/api/projects', {
-      method: 'POST',
+    const url = id ? `/api/projects/${id}` : '/api/projects';
+    const method = id ? 'PUT' : 'POST';
+    
+    const res = await authFetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, tag, video, desc, color: Math.floor(Math.random()*5) }) // Random background color for simplicity
+      body: JSON.stringify({ title, tag, video, desc, color: Math.floor(Math.random()*5) })
     });
     
     if (res.ok) {
-      document.getElementById('p-title').value = '';
-      document.getElementById('p-tag').value = '';
-      document.getElementById('p-video').value = '';
-      document.getElementById('p-desc').value = '';
+      cancelEdit();
       loadData();
     } else {
       const err = await res.json();
@@ -139,7 +169,7 @@ async function addProject(event) {
   } catch (e) {
     alert('Bağlantı hatası: ' + e.message);
   } finally {
-    if (btn) btn.textContent = oldText;
+    if (btn) btn.textContent = id ? 'Değişiklikleri Kaydet' : 'Projeyi Yayımla';
   }
 }
 

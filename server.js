@@ -114,6 +114,24 @@ app.post('/api/projects', requireAuth, async (req, res) => {
   }
 });
 
+app.put('/api/projects/:id', requireAuth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { title, tag, desc, video } = req.body;
+    const finalTag = tag || 'Proje';
+    const finalVideo = video || '';
+    
+    await pool.query(
+      'UPDATE projects SET title = ?, tag = ?, description = ?, video = ? WHERE id = ?',
+      [title, finalTag, desc, finalVideo, id]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Veritabanında güncellenemedi. Hata: ' + err.message });
+  }
+});
+
 app.delete('/api/projects/:id', requireAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id);

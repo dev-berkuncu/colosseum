@@ -176,6 +176,7 @@
     </p>
     
     <label>Proje Başlığı</label>
+    <input type="hidden" id="p-id" value="">
     <input type="text" id="p-title" placeholder="Örn: Kapadokya Tanıtımı">
     
     <label>Kategori / Etiket</label>
@@ -187,7 +188,10 @@
     <label>Kısa Açıklama</label>
     <textarea id="p-desc" rows="3" placeholder="Proje hakkında dikkat çekici bir bilgi..."></textarea>
     
-    <button onclick="addProject(event)" style="margin-top: 8px;">Projeyi Yayımla</button>
+    <div style="display:flex; gap:12px; margin-top: 8px;">
+      <button id="btn-submit-project" onclick="saveProject(event)" style="flex:1;">Projeyi Yayımla</button>
+      <button id="btn-cancel-edit" onclick="cancelEdit()" style="display:none; flex:0.4; background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid var(--glass-border);">İptal</button>
+    </div>
   </div>
 
   <div class="card">
