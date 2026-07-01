@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Fallback user and pass for Admin Panel
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'colosseum123';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'Colosseum_Admin2026!*';
 const ADMIN_TOKEN = 'tok_' + Buffer.from(ADMIN_USER + ':' + ADMIN_PASS).toString('base64');
 
 // MySQL Connection Pool
