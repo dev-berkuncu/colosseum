@@ -354,3 +354,12 @@ footer{position:relative;z-index:3;padding:3rem 4rem;border-top:1px solid rgba(1
   .hero-kicker{letter-spacing:.28em;}.hero-title{font-size:clamp(2.45rem,14vw,4rem);}.hero-cta{gap:.7rem;}.btn-hero{width:100%;text-align:center;}
   .stats-row{gap:1.2rem;}.stat{min-width:110px;}
 }
+
+/* ── LOGO ANİMASYONU ── */
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.rotate-logo {
+  animation: slowSpin 45s linear infinite;
+}
