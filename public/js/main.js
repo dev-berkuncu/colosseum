@@ -163,10 +163,16 @@ function escapeHTML(str = '') {
 function renderProjects() {
   const grid = document.getElementById('projectsGrid'); grid.innerHTML = '';
   state.projects.forEach(p => {
+    let bgStyle = `background:${COLORS[p.color] || COLORS[0]}`;
+    if (p.video && (p.video.includes('youtube') || p.video.includes('youtu.be'))) {
+      const yid = youtubeId(p.video);
+      bgStyle = `background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('https://img.youtube.com/vi/${yid}/maxresdefault.jpg') center/cover no-repeat`;
+    }
+
     const card = document.createElement('div');
     card.className = 'project-card reveal' + (p.video ? ' has-video' : '');
     card.innerHTML = `
-      <div class="project-card-bg" style="background:${COLORS[p.color] || COLORS[0]}"></div>
+      <div class="project-card-bg" style="${bgStyle}"></div>
       <div class="project-card-overlay">
         <div class="project-tag">${escapeHTML(p.tag)}</div>
         <div class="project-title">${escapeHTML(p.title)}</div>
