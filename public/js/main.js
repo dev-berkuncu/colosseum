@@ -72,10 +72,34 @@ function drawColosseum(t) {
     const lh = cH * layer.h;
     const n = layer.floors;
     const archW = cW / n;
+    
+    // Alttan üste (2 -> 0) sıralaması
+    const layerRev = 2 - li; 
+    
     for (let i = 0; i < n; i++) {
+      // Puzzle mantığı: Her parçanın kendi giriş zamanı var
+      const delay = layerRev * 0.4 + ((i * 7) % n) * 0.08;
+      let progress = (t - delay) * 2.5;
+      if (progress < 0) continue;
+      if (progress > 1) progress = 1;
+      
+      const ease = 1 - Math.pow(1 - progress, 3);
+      
+      // Parçalar rastgele açılardan uçarak gelsin
+      const randAngle = ((i * 13 + li * 7) % 10) / 10 * Math.PI * 2;
+      const startX = Math.cos(randAngle) * 300;
+      const startY = Math.sin(randAngle) * 300 - 100;
+      
+      const offX = (1 - ease) * startX;
+      const offY = (1 - ease) * startY;
+      
+      ctx.save();
+      ctx.translate(offX, offY);
+      ctx.globalAlpha = ease;
+      
       const ax = cX + i * archW;
       
-      // Işık dalgalanması (duvarların hareketli görünmesi için)
+      // Işık dalgalanması
       const wave = Math.sin(t * 2.5 + (i + li * 2) * 0.6) * 15;
       const light = (i / n) * 18 + wave;
       
@@ -99,19 +123,41 @@ function drawColosseum(t) {
       ctx.strokeStyle = 'rgba(255,236,176,.18)'; ctx.lineWidth = .6; ctx.stroke();
 
       ctx.strokeStyle = 'rgba(70,44,24,.18)'; ctx.lineWidth = .7; ctx.strokeRect(ax, ly, archW, lh);
+      
+      ctx.restore();
     }
   });
 
-  ctx.fillStyle = 'rgba(118,80,44,.94)'; ctx.fillRect(cX - 8, cY - 16, cW + 16, 20);
-  const toothN = Math.floor(cW / 23); const toothW = cW / toothN;
-  for (let i = 0; i < toothN; i++) {
-    if (i % 2 === 0) { ctx.fillStyle = 'rgba(93,61,35,.95)'; ctx.fillRect(cX + i * toothW, cY - 31, toothW * .82, 18); }
+  // Çatı kısmının gelmesi
+  let roofProgress = (t - 1.6) * 3;
+  if (roofProgress > 0) {
+    if (roofProgress > 1) roofProgress = 1;
+    const roofEase = 1 - Math.pow(1 - roofProgress, 3);
+    
+    ctx.save();
+    ctx.translate(0, (1 - roofEase) * -150);
+    ctx.globalAlpha = roofEase;
+    
+    ctx.fillStyle = 'rgba(118,80,44,.94)'; ctx.fillRect(cX - 8, cY - 16, cW + 16, 20);
+    const toothN = Math.floor(cW / 23); const toothW = cW / toothN;
+    for (let i = 0; i < toothN; i++) {
+      if (i % 2 === 0) { ctx.fillStyle = 'rgba(93,61,35,.95)'; ctx.fillRect(cX + i * toothW, cY - 31, toothW * .82, 18); }
+    }
+    ctx.restore();
   }
+
+  // Kamera çizimini de introya dahil edelim (t'ye bağlı opacity verebiliriz, o zaten mainLoop'da)
 
   ctx.beginPath(); ctx.ellipse(cx, cY, cW * .52, 15, 0, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(255,231,158,.14)'; ctx.lineWidth = 1; ctx.stroke();
 }
 
 function drawCamera() {
+  let camAlpha = (animT - 2.0) * 2;
+  if (camAlpha < 0) return;
+  if (camAlpha > 1) camAlpha = 1;
+  ctx.save();
+  ctx.globalAlpha = camAlpha;
+
   const tx = W * .82, ty = H * .80;
   const th = H * .22; // tripod height
   const topY = ty - th;
@@ -159,6 +205,8 @@ function drawCamera() {
   ctx.fillStyle = 'rgba(200,180,150,.15)';
   ctx.beginPath(); ctx.arc(tx - 11, topY - 44, 4, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(tx + 11, topY - 44, 4, 0, Math.PI*2); ctx.fill();
+  
+  ctx.restore();
 }
 
 function drawDust() {
