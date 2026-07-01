@@ -83,7 +83,7 @@ app.get('/api/data', async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Veritabanı bağlantı hatası.' });
+    res.status(500).json({ error: 'Veritabanı bağlantı hatası: ' + err.message });
   }
 });
 
@@ -110,7 +110,7 @@ app.post('/api/projects', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Veritabanına kaydedilemedi.' });
+    res.status(500).json({ error: 'Veritabanına kaydedilemedi. Hata Detayı: ' + err.message });
   }
 });
 
@@ -121,7 +121,7 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
     res.sendStatus(204);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Veritabanından silinemedi.' });
+    res.status(500).json({ error: 'Veritabanından silinemedi. Hata: ' + err.message });
   }
 });
 
@@ -136,7 +136,7 @@ app.post('/api/settings', requireAuth, async (req, res) => {
     res.json({ title, sub, email, phone });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Ayarlar güncellenemedi.' });
+    res.status(500).json({ error: 'Ayarlar güncellenemedi. Hata: ' + err.message });
   }
 });
 
