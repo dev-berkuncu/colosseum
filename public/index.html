@@ -137,20 +137,20 @@
         </div>
       </div>
     </div>
-    <form class="contact-form reveal" onsubmit="return false;">
+    <form class="contact-form reveal" onsubmit="submitContact(event)">
       <div class="form-group">
         <label>Adınız</label>
-        <input type="text" placeholder="Adınız Soyadınız">
+        <input type="text" id="contact-name" placeholder="Adınız Soyadınız" required>
       </div>
       <div class="form-group">
         <label>E-Posta</label>
-        <input type="email" placeholder="iletisim@ornek.com">
+        <input type="email" id="contact-email" placeholder="iletisim@ornek.com" required>
       </div>
       <div class="form-group">
         <label>Mesajınız</label>
-        <textarea placeholder="Projenizden bahsedin..."></textarea>
+        <textarea id="contact-message" placeholder="Projenizden bahsedin..." required></textarea>
       </div>
-      <button class="btn-submit">Mesaj Gönder</button>
+      <button type="submit" class="btn-submit" id="contact-submit-btn">Mesaj Gönder</button>
     </form>
   </div>
 </section>

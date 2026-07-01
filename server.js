@@ -3,6 +3,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const https = require('https');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -156,6 +157,60 @@ app.post('/api/settings', requireAuth, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Ayarlar güncellenemedi. Hata: ' + err.message });
   }
+});
+
+// Contact Form Webhook (Discord)
+app.post('/api/contact', (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: 'Eksik bilgi' });
+  }
+
+  const payload = JSON.stringify({
+    embeds: [{
+      title: "Yeni İletişim Formu Mesajı",
+      color: 12621389, // Gold color
+      fields: [
+        { name: "İsim", value: name, inline: true },
+        { name: "E-Posta", value: email, inline: true },
+        { name: "Mesaj", value: message }
+      ],
+      timestamp: new Date().toISOString()
+    }]
+  });
+
+  const webhookUrl = 'https://discord.com/api/webhooks/1453535410826379377/a_Ks3VeeYpy0u2RZFzVi1r1ef91h9v0ulN8Q998ki27RSjsbU1GTbX1jX9pfF2bZO-7B';
+  const urlParams = new URL(webhookUrl);
+
+  const options = {
+    hostname: urlParams.hostname,
+    path: urlParams.pathname,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
+    }
+  };
+
+  const discordReq = https.request(options, (discordRes) => {
+    let responseData = '';
+    discordRes.on('data', chunk => responseData += chunk);
+    discordRes.on('end', () => {
+      if (discordRes.statusCode >= 200 && discordRes.statusCode < 300) {
+        res.status(200).json({ success: true });
+      } else {
+        res.status(500).json({ error: 'Webhook gönderilemedi', details: responseData });
+      }
+    });
+  });
+
+  discordReq.on('error', (e) => {
+    console.error(e);
+    res.status(500).json({ error: 'Bağlantı hatası' });
+  });
+
+  discordReq.write(payload);
+  discordReq.end();
 });
 
 // Always listen for Hostinger/cPanel to proxy the application

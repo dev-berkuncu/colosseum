@@ -225,6 +225,53 @@ function applySettings() {
   document.title = state.settings.title + ' Film & Media';
 }
 
+/* ─────────────── İLETİŞİM FORMU ─────────────── */
+window.submitContact = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('contact-submit-btn');
+  const name = document.getElementById('contact-name').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const message = document.getElementById('contact-message').value.trim();
+
+  if (!name || !email || !message) return;
+
+  const oldText = btn.textContent;
+  btn.textContent = 'Gönderiliyor...';
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.8';
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+
+    if (res.ok) {
+      btn.textContent = 'Mesaj İletildi ✓';
+      btn.style.background = '#4CAF50';
+      btn.style.color = '#fff';
+      document.getElementById('contact-name').value = '';
+      document.getElementById('contact-email').value = '';
+      document.getElementById('contact-message').value = '';
+    } else {
+      btn.textContent = 'Hata Oluştu';
+      btn.style.background = '#e53e3e';
+      btn.style.color = '#fff';
+    }
+  } catch (err) {
+    btn.textContent = 'Bağlantı Hatası';
+  } finally {
+    setTimeout(() => {
+      btn.textContent = oldText;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+    }, 4000);
+  }
+}
+
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeVideoModal(); } });
 
 // Start the app by fetching data
