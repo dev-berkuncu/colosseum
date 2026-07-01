@@ -104,16 +104,55 @@ function drawColosseum(t) {
   ctx.beginPath(); ctx.ellipse(cx, cY, cW * .52, 15, 0, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(255,231,158,.14)'; ctx.lineWidth = 1; ctx.stroke();
 }
 
-function drawCypress() {
-  const tx = W * .76, ty = H * .78;
-  const trunkH = H * .34;
-  ctx.fillStyle = 'rgba(70,49,31,.82)';
-  ctx.beginPath(); ctx.moveTo(tx - 9, ty); ctx.bezierCurveTo(tx - 8, ty - trunkH * .3, tx - 5, ty - trunkH * .7, tx - 2, ty - trunkH); ctx.lineTo(tx + 5, ty - trunkH); ctx.bezierCurveTo(tx + 7, ty - trunkH * .65, tx + 10, ty - trunkH * .28, tx + 12, ty); ctx.closePath(); ctx.fill();
-  const crown = ctx.createLinearGradient(tx, ty - trunkH, tx, ty);
-  crown.addColorStop(0, 'rgba(49,68,38,.94)'); crown.addColorStop(1, 'rgba(39,52,30,.9)');
-  ctx.fillStyle = crown;
-  ctx.beginPath(); ctx.ellipse(tx, ty - trunkH * .58, 40, 170, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(29,39,23,.42)'; ctx.beginPath(); ctx.ellipse(tx + 10, ty - trunkH * .54, 23, 138, 0, 0, Math.PI * 2); ctx.fill();
+function drawCamera() {
+  const tx = W * .82, ty = H * .80;
+  const th = H * .22; // tripod height
+  const topY = ty - th;
+
+  // Beam
+  const scrollAmt = Math.min(window.scrollY / (window.innerHeight * 0.6), 1);
+  if (scrollAmt > 0) {
+    const beam = ctx.createLinearGradient(tx - 35, topY - 20, W * 0.3, H);
+    beam.addColorStop(0, `rgba(255, 240, 180, ${0.45 * scrollAmt})`);
+    beam.addColorStop(1, `rgba(255, 240, 180, 0)`);
+    ctx.fillStyle = beam;
+    ctx.beginPath();
+    ctx.moveTo(tx - 35, topY - 20); // lens center
+    ctx.lineTo(0, H - 200);
+    ctx.lineTo(0, H);
+    ctx.lineTo(W, H);
+    ctx.fill();
+  }
+
+  // Tripod
+  ctx.strokeStyle = 'rgba(50,30,20,.95)';
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(tx, topY); ctx.lineTo(tx - 28, ty);
+  ctx.moveTo(tx, topY); ctx.lineTo(tx + 28, ty);
+  ctx.moveTo(tx, topY); ctx.lineTo(tx, ty + 10);
+  ctx.stroke();
+
+  // Camera Body
+  ctx.fillStyle = 'rgba(25,15,10,.98)';
+  ctx.fillRect(tx - 22, topY - 32, 44, 28);
+  
+  // Lens
+  ctx.fillStyle = 'rgba(20,10,5,.98)';
+  ctx.beginPath();
+  ctx.moveTo(tx - 22, topY - 22);
+  ctx.lineTo(tx - 40, topY - 12);
+  ctx.lineTo(tx - 40, topY - 32);
+  ctx.fill();
+
+  // Reels
+  ctx.fillStyle = 'rgba(35,20,15,.95)';
+  ctx.beginPath(); ctx.arc(tx - 11, topY - 44, 13, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(tx + 11, topY - 44, 13, 0, Math.PI*2); ctx.fill();
+  
+  ctx.fillStyle = 'rgba(200,180,150,.15)';
+  ctx.beginPath(); ctx.arc(tx - 11, topY - 44, 4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(tx + 11, topY - 44, 4, 0, Math.PI*2); ctx.fill();
 }
 
 function drawDust() {
@@ -132,7 +171,7 @@ function drawFog() {
   ctx.fillStyle = fog; ctx.fillRect(0, H * .55, W, H * .31);
 }
 let animT = 0;
-function animLoop() { ctx.clearRect(0, 0, W, H); animT += .008; drawColosseum(animT); drawCypress(animT); drawDust(); drawFog(); requestAnimationFrame(animLoop); }
+function animLoop() { ctx.clearRect(0, 0, W, H); animT += .008; drawColosseum(animT); drawCamera(); drawDust(); drawFog(); requestAnimationFrame(animLoop); }
 animLoop();
 
 /* ─────────────── YAPRAK ANİMASYONU ─────────────── */
@@ -154,7 +193,18 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: .15 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-window.addEventListener('scroll', () => { document.getElementById('navbar').classList.toggle('scrolled', scrollY > 80); });
+window.addEventListener('scroll', () => { 
+  document.getElementById('navbar').classList.toggle('scrolled', scrollY > 80); 
+  
+  const hakkimizda = document.getElementById('hakkimizda');
+  if (hakkimizda) {
+    const rect = hakkimizda.getBoundingClientRect();
+    let progress = 1 - (rect.top / window.innerHeight);
+    if (progress < 0) progress = 0;
+    if (progress > 1.5) progress = 1.5;
+    hakkimizda.style.setProperty('--illumination', progress);
+  }
+});
 
 /* ─────────────── PROJELER ─────────────── */
 function escapeHTML(str = '') {

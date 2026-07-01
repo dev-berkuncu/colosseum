@@ -188,6 +188,15 @@ nav.scrolled .nav-admin{background:rgba(122,85,32,.06);color:var(--gold-dark);bo
   background:
     radial-gradient(ellipse at 82% 20%,rgba(184,138,45,.12),transparent 30%),
     linear-gradient(180deg,#F0DEB8,#E9D4A8 72%,#DFC694);
+  position: relative;
+}
+#hakkimizda::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 236, 164, calc(var(--illumination, 0) * 0.45)), transparent 80%);
+  pointer-events: none;
+  z-index: 1;
 }
 .about-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:5.5rem;align-items:center;}
 .about-image{
